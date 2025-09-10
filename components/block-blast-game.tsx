@@ -5,16 +5,12 @@ import type React from "react"
 import { useState, useCallback, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 
-// Block shapes (Tetris-like pieces)
 const BLOCK_SHAPES = [
-  // Single block
   [[1]],
-  // Line pieces
   [[1, 1]],
   [[1, 1, 1]],
   [[1], [1]],
   [[1], [1], [1]],
-  // L shapes
   [
     [1, 1],
     [1, 0],
@@ -102,12 +98,10 @@ export default function BlockBlastGame() {
     return blocks
   }, [])
 
-  // Initialize blocks
   useEffect(() => {
     setNextBlocks(generateBlocks())
   }, [generateBlocks])
 
-  // Check if block can be placed at position
   const canPlaceBlock = useCallback(
     (block: Block, startRow: number, startCol: number) => {
       for (let row = 0; row < block.shape.length; row++) {
@@ -132,7 +126,6 @@ export default function BlockBlastGame() {
     [grid],
   )
 
-  // Place block on grid
   const placeBlock = useCallback(
     (block: Block, startRow: number, startCol: number) => {
       const newGrid = grid.map((row) => row.map((cell) => ({ ...cell })))
@@ -149,21 +142,17 @@ export default function BlockBlastGame() {
 
       setGrid(newGrid)
 
-      // Remove the placed block from next blocks
       setNextBlocks((prev) => prev.filter((b) => b.id !== block.id))
 
-      // Check for line clears and update score
       clearLines(newGrid)
     },
     [grid],
   )
 
-  // Clear completed lines
   const clearLines = useCallback((currentGrid: GridCell[][]) => {
     const newGrid = currentGrid.map((row) => row.map((cell) => ({ ...cell })))
     let linesCleared = 0
 
-    // Check rows
     for (let row = 0; row < GRID_SIZE; row++) {
       if (newGrid[row].every((cell) => cell.filled)) {
         for (let col = 0; col < GRID_SIZE; col++) {
@@ -173,7 +162,6 @@ export default function BlockBlastGame() {
       }
     }
 
-    // Check columns
     for (let col = 0; col < GRID_SIZE; col++) {
       if (newGrid.every((row) => row[col].filled)) {
         for (let row = 0; row < GRID_SIZE; row++) {
@@ -189,7 +177,6 @@ export default function BlockBlastGame() {
     }
   }, [])
 
-  // Check if any blocks can be placed
   const checkGameOver = useCallback(() => {
     for (const block of nextBlocks) {
       for (let row = 0; row <= GRID_SIZE - block.shape.length; row++) {
@@ -203,27 +190,23 @@ export default function BlockBlastGame() {
     return true
   }, [nextBlocks, canPlaceBlock])
 
-  // Generate new blocks when all are used
   useEffect(() => {
     if (nextBlocks.length === 0) {
       setNextBlocks(generateBlocks())
     }
   }, [nextBlocks, generateBlocks])
 
-  // Check game over condition
   useEffect(() => {
     if (nextBlocks.length > 0 && checkGameOver()) {
       setGameOver(true)
     }
   }, [nextBlocks, checkGameOver])
 
-  // Handle drag start
   const handleDragStart = (e: React.DragEvent, block: Block) => {
     setDraggedBlock(block)
     e.dataTransfer.effectAllowed = "move"
   }
 
-  // Handle drag over grid
   const handleDragOver = (e: React.DragEvent, row: number, col: number) => {
     e.preventDefault()
     if (draggedBlock && canPlaceBlock(draggedBlock, row, col)) {
@@ -235,7 +218,6 @@ export default function BlockBlastGame() {
     }
   }
 
-  // Handle drop on grid
   const handleDrop = (e: React.DragEvent, row: number, col: number) => {
     e.preventDefault()
     if (draggedBlock && canPlaceBlock(draggedBlock, row, col)) {
@@ -245,7 +227,6 @@ export default function BlockBlastGame() {
     setPreviewPosition(null)
   }
 
-  // Reset game
   const resetGame = () => {
     setGrid(
       Array(GRID_SIZE)
@@ -263,7 +244,6 @@ export default function BlockBlastGame() {
     setPreviewPosition(null)
   }
 
-  // Check if cell should show preview
   const shouldShowPreview = (row: number, col: number) => {
     if (!draggedBlock || !previewPosition) return false
 
@@ -281,12 +261,10 @@ export default function BlockBlastGame() {
 
   return (
     <div className="flex flex-col items-center gap-6">
-      {/* Score and Game Over */}
       <div className="text-center">
         <div className="text-2xl font-bold mb-2">{score}</div>
       </div>
 
-      {/* Game Grid */}
       <div className="grid grid-cols-10 gap-1 bg-muted p-2 rounded-lg">
         {grid.map((row, rowIndex) =>
           row.map((cell, colIndex) => (
@@ -304,7 +282,6 @@ export default function BlockBlastGame() {
         )}
       </div>
 
-      {/* Next Blocks */}
       <div className="flex gap-4 flex-wrap justify-center">
         {nextBlocks.map((block) => (
           <div
@@ -329,7 +306,6 @@ export default function BlockBlastGame() {
         ))}
       </div>
 
-      {/* Reset Button */}
       <Button onClick={resetGame} className="bg-primary hover:bg-primary/90 w-12 h-12 rounded-full">
         ↻
       </Button>
